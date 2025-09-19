@@ -25,30 +25,39 @@ def track_name_to_uri(title: str, artist: str):
 
 
 def convert_json_to_uris(input_file: str, output_file: str):
-    """Read songs from JSON, fetch URIs, and save them to another JSON file."""
+    """Read songs from JSON, fetch URIs, and save them with metadata to another JSON file."""
     with open(input_file, "r", encoding="utf-8") as f:
         songs = json.load(f)
 
-    uris = []
+    results_list = []
     for song in songs:
         title = song.get("title", "")
         artist = song.get("interpret", "")
         result = track_name_to_uri(title, artist)
+
         if result:
             uri, found_title, found_artist = result
-            uris.append(uri)
-            print(f"Found: {found_title} by {found_artist} → {uri}")
+            print(f"✅ Found: {found_title} by {found_artist} → {uri}")
+            results_list.append({
+                "title": title,
+                "interpret": artist,
+                "uri": uri
+            })
         else:
             print(f"❌ Not found: {title} by {artist}")
+            results_list.append({
+                "title": title,
+                "interpret": artist,
+                "uri": "NOT_FOUND"
+            })
 
-    # Save URIs to output JSON file
+    # Save results with URIs (or NOT_FOUND)
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(uris, f, indent=2)
+        json.dump(results_list, f, indent=2, ensure_ascii=False)
 
-    print(f"\n✅ Saved {len(uris)} URIs to {output_file}")
+    print(f"\n✅ Saved results for {len(results_list)} songs to {output_file}")
 
 
 # Example usage
 if __name__ == "__main__":
-    convert_json_to_uris("songs.json", "uris.json")
-
+    convert_json_to_uris("songs.json", "songs_with_uris.json")

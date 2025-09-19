@@ -34,3 +34,5 @@ samples, guidance on mobile development, and a full API reference.
 16. stop when somebody has 10 correct songs
 
 ## Workflow
+
+- don't forget to convert new lists of songs to uri's

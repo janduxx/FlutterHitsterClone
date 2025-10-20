@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hitsterclone/SetupPage.dart';
+import 'package:provider/provider.dart';
+import 'package:hitsterclone/services/LogicService.dart';
 
 class StartUpPage extends StatelessWidget {
   const StartUpPage({super.key});
@@ -48,6 +50,8 @@ class StartUpPage extends StatelessWidget {
             child: const Text('Ja'),
             onPressed: () {
               Navigator.of(ctx).pop();
+              // Mark startup as seen so future launches skip this page
+              context.read<Logicservice>().markStartupSeen();
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const SetupPage()),

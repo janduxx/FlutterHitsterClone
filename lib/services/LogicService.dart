@@ -6,12 +6,14 @@ class Logicservice extends ChangeNotifier {
   // Singleton setup
   static final Logicservice _instance = Logicservice._internal();
   factory Logicservice() => _instance;
+  late final Future<void> initFuture;
   Logicservice._internal() {
-    _loadPlayers();
+    initFuture = _initialize();
   }
 
   // Persistence keys
   static const String _playersKey = 'players';
+  static const String _hasSeenStartupKey = 'has_seen_startup';
 
   // Variables
   List<Track> _tracks = [];
@@ -39,6 +41,8 @@ class Logicservice extends ChangeNotifier {
   Playlist? get playlist => _playlist;
   int get rounds => _rounds;
   List<String> _players = [];
+  bool _hasSeenStartup = false;
+  bool get hasSeenStartup => _hasSeenStartup;
   void setPlayers(List<String> newPlayers) {
     _players = newPlayers;
     notifyListeners();
@@ -94,6 +98,33 @@ class Logicservice extends ChangeNotifier {
         _players = saved;
         notifyListeners();
       }
+    } catch (_) {
+      // ignore persistence errors
+    }
+  }
+
+  Future<void> _loadStartupFlag() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _hasSeenStartup = prefs.getBool(_hasSeenStartupKey) ?? false;
+    } catch (_) {
+      // ignore persistence errors
+    }
+  }
+
+  Future<void> _initialize() async {
+    await Future.wait([
+      _loadPlayers(),
+      _loadStartupFlag(),
+    ]);
+  }
+
+  Future<void> markStartupSeen() async {
+    _hasSeenStartup = true;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_hasSeenStartupKey, true);
     } catch (_) {
       // ignore persistence errors
     }

@@ -58,19 +58,25 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     showCupertinoDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) {
-        return const CupertinoAlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 8),
-              CupertinoActivityIndicator(),
-              SizedBox(height: 12),
-              Text('Lade Playlist Songs…'),
-            ],
-          ),
-        );
-      },
+      builder: (_) => CupertinoAlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            const CupertinoActivityIndicator(),
+            const SizedBox(height: 12),
+            const Text('Lade Playlist Songs…'),
+            const SizedBox(height: 4),
+            Text(
+              'Das kann einen Moment dauern.',
+              style: TextStyle(
+                fontSize: 12,
+                color: CupertinoColors.systemGrey.resolveFrom(context),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
 
     final tracks = await api.getPlaylistTracks(playlist.id);

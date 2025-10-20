@@ -25,7 +25,10 @@ class PlaylistSourcePage extends StatelessWidget {
       builder: (context, logic, _) {
         return Scaffold(
           extendBodyBehindAppBar: true,
-
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+          ),
           body: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -205,7 +208,7 @@ class PlaylistSourcePage extends StatelessWidget {
     String value, {
     VoidCallback? onTap,
   }) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

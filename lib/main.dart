@@ -17,10 +17,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => Logicservice(),
-      child: MaterialApp(
-        title: 'Hipster Clone',
-        home: StartUpPage(),
-        debugShowCheckedModeBanner: false,
+      child: Consumer<Logicservice>(
+        builder: (context, logic, _) {
+          return FutureBuilder<void>(
+            future: logic.initFuture,
+            builder: (context, snapshot) {
+              final ready = snapshot.connectionState == ConnectionState.done;
+              return MaterialApp(
+                title: 'Hipster Clone',
+                home: ready
+                    ? (logic.hasSeenStartup ? const SetupPage() : const StartUpPage())
+                    : const Scaffold(body: SizedBox()),
+                debugShowCheckedModeBanner: false,
+              );
+            },
+          );
+        },
       ),
     );
   }

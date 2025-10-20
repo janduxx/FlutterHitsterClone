@@ -65,17 +65,25 @@ class _ArtistSelectionPageState extends State<ArtistSelectionPage> {
 
   Future<void> _selectArtist(Artist artist) async {
     // Show progress dialog
-    showDialog(
+    showCupertinoDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const AlertDialog(
+      builder: (_) => CupertinoAlertDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: 8),
-            CupertinoActivityIndicator(),
-            SizedBox(height: 12),
-            Text('Lade Künstler Songs…'),
+            const SizedBox(height: 8),
+            const CupertinoActivityIndicator(),
+            const SizedBox(height: 12),
+            const Text('Lade Künstler Songs…'),
+            const SizedBox(height: 4),
+            Text(
+              'Das kann einen Moment dauern.',
+              style: TextStyle(
+                fontSize: 12,
+                color: CupertinoColors.systemGrey.resolveFrom(context),
+              ),
+            ),
           ],
         ),
       ),
@@ -228,7 +236,7 @@ class _ArtistSelectionPageState extends State<ArtistSelectionPage> {
                                         itemBuilder: (context, index) =>
                                             _artistRow(
                                               _results[index],
-                                              onTap: () => _selectArtist(
+                                              onTap: () => _confirmThenSelectArtist(
                                                 _results[index],
                                               ),
                                             ),
@@ -285,5 +293,39 @@ class _ArtistSelectionPageState extends State<ArtistSelectionPage> {
         ),
       ),
     );
+  }
+
+  Future<bool> _confirmArtistSelection(Artist artist) async {
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('Künstler auswählen'),
+        content: Text(
+          'Möchtest du den Künstler "${artist.name}" wählen?',
+          textAlign: TextAlign.center,
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Auswählen'),
+          ),
+        ],
+      ),
+    );
+    return confirmed == true;
+  }
+
+  Future<void> _confirmThenSelectArtist(Artist artist) async {
+    final ok = await _confirmArtistSelection(artist);
+    if (ok) {
+      await _selectArtist(artist);
+    }
   }
 }

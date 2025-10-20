@@ -331,6 +331,17 @@ class SetupPage extends StatelessWidget {
                       letterSpacing: 1.2,
                     ),
                   ),
+
+                  const Text(
+                    'MUSIK. WISSEN. SPASS.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 1.1,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   Container(
                     margin: const EdgeInsets.symmetric(
@@ -476,7 +487,7 @@ class SetupPage extends StatelessWidget {
     String value, {
     VoidCallback? onTap,
   }) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

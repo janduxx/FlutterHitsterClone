@@ -65,17 +65,25 @@ class _SearchPlaylistPageState extends State<SearchPlaylistPage> {
 
   Future<void> _selectArtist(Playlist playlist) async {
     // Show progress dialog
-    showDialog(
+    showCupertinoDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const AlertDialog(
+      builder: (_) => CupertinoAlertDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: 8),
-            CupertinoActivityIndicator(),
-            SizedBox(height: 12),
-            Text('Lade Playlist Songs…'),
+            const SizedBox(height: 8),
+            const CupertinoActivityIndicator(),
+            const SizedBox(height: 12),
+            const Text('Lade Playlist Songs…'),
+            const SizedBox(height: 4),
+            Text(
+              'Das kann einen Moment dauern.',
+              style: TextStyle(
+                fontSize: 12,
+                color: CupertinoColors.systemGrey.resolveFrom(context),
+              ),
+            ),
           ],
         ),
       ),
@@ -229,7 +237,7 @@ class _SearchPlaylistPageState extends State<SearchPlaylistPage> {
                                         itemBuilder: (context, index) =>
                                             _artistRow(
                                               _results[index],
-                                              onTap: () => _selectArtist(
+                                              onTap: () => _confirmThenSelectPlaylist(
                                                 _results[index],
                                               ),
                                             ),
@@ -286,5 +294,41 @@ class _SearchPlaylistPageState extends State<SearchPlaylistPage> {
         ),
       ),
     );
+  }
+
+  Future<bool> _confirmPlaylistSelection(Playlist playlist) async {
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return CupertinoAlertDialog(
+          title: const Text('Playlist auswählen'),
+          content: Text(
+            'Möchtest du die Playlist "${playlist.name}" wählen?',
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Abbrechen'),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Auswählen'),
+            ),
+          ],
+        );
+      },
+    );
+    return confirmed == true;
+  }
+
+  Future<void> _confirmThenSelectPlaylist(Playlist playlist) async {
+    final ok = await _confirmPlaylistSelection(playlist);
+    if (ok) {
+      await _selectArtist(playlist);
+    }
   }
 }

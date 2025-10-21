@@ -26,7 +26,9 @@ class MyApp extends StatelessWidget {
               return MaterialApp(
                 title: 'Hipster Clone',
                 home: ready
-                    ? (logic.hasSeenStartup ? const SetupPage() : const StartUpPage())
+                    ? (logic.hasSeenStartup
+                          ? const SetupPage()
+                          : const StartUpPage())
                     : const Scaffold(body: SizedBox()),
                 debugShowCheckedModeBanner: false,
               );

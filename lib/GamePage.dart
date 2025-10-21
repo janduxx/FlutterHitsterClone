@@ -3,6 +3,7 @@ library game_page;
 import 'dart:convert';
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gif/gif.dart';
 import 'package:hitsterclone/SetupPage.dart';
@@ -642,7 +643,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               child: Column(
                 children: [
                   Text(
-                    "GUESS",
+                    "Denkt nach!",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w900,
@@ -809,15 +810,34 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                       ),
                     ),
                   Expanded(
-                    child: Text(
-                      currentSong?.name ?? "UNKNOWN",
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        height: 1.3,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          currentSong?.name ?? "FEHLER",
+                          style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            height: 1.3,
+                            color: Colors.white,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                        ),
+
+                        const SizedBox(height: 4),
+                        Text(
+                          currentSong?.artists.first ?? "FEHLER",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white70,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                        ),
+                      ],
                     ),
                   ),
                 ],

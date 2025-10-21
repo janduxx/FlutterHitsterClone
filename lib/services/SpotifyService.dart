@@ -12,12 +12,10 @@ class SpotifyService {
   String _token = 'NONE';
 
   Future<bool> resumeSong() async {
-    await WebApiService().ensureActiveDevice(force: true);
     return await WebApiService().resumePlayback();
   }
 
   Future<bool> skipSong() async {
-    await WebApiService().ensureActiveDevice(force: true);
     return await WebApiService().skipToNext();
   }
 
@@ -31,7 +29,6 @@ class SpotifyService {
   }
 
   Future<void> pauseSong() async {
-    await WebApiService().ensureActiveDevice(force: true);
     await WebApiService().pausePlayback();
   }
 
@@ -39,8 +36,6 @@ class SpotifyService {
   bool _repeatLastSong = false;
 
   Future<Track?> playRandomSong() async {
-    await WebApiService().ensureActiveDevice(force: true);
-
     try {
       final list = Logicservice().trackYetToPlay;
       if (list.isEmpty) {

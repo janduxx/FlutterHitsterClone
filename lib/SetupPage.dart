@@ -242,6 +242,36 @@ class SetupPage extends StatelessWidget {
     );
   }
 
+  void _showDeviceSelectionRequiredDialog(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('Gerät benötigt'),
+        content: const Padding(
+          padding: EdgeInsets.only(top: 8.0),
+          child: Text(
+            'Bitte wähle ein Gerät, um das Spiel zu starten.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Abbrechen'),
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text('Gerät wählen'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _connectOrCheckSpotify(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _connectOrCheckSpotify(BuildContext context) async {
     // Try to authorize if token is missing, otherwise refresh device status
     try {
@@ -254,34 +284,80 @@ class SetupPage extends StatelessWidget {
         }
         WebApiService().setToken(fetched);
       }
-      // Refresh connection and attempt to activate a device
-      await WebApiService().ensureConnected(force: true);
-      await WebApiService().ensureActiveDevice(force: true);
 
-      // Show current status
-      final isConnected = Logicservice().connected;
-      showCupertinoDialog(
-        context: context,
-        builder: (ctx) => CupertinoAlertDialog(
-          title: const Text('Spotify Status'),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Text(
-              isConnected
-                  ? 'Verbunden. Gerät erkannt.'
-                  : 'Verbunden, aber kein Gerät erkannt.',
-              textAlign: TextAlign.center,
+      // Refresh connection, then fetch available devices and let user choose
+      await WebApiService().ensureConnected(force: true);
+      final devices = await WebApiService().getDevices();
+
+      if (devices.isEmpty) {
+        _showActiveDeviceRequiredDialog(context);
+        return;
+      }
+
+      final selectedDevice =
+          await showCupertinoModalPopup<Map<String, dynamic>>(
+            context: context,
+            builder: (ctx) {
+              return CupertinoActionSheet(
+                title: const Text('Gerät wählen'),
+                message: const Text(
+                  'Wähle ein Spotify Gerät für die Wiedergabe.',
+                ),
+                actions: devices.map((d) {
+                  final name = (d['name'] as String?) ?? 'Unbekannt';
+                  final type = (d['type'] as String?) ?? '';
+                  final isActive = d['is_active'] == true;
+                  final label = isActive
+                      ? '$name${type.isNotEmpty ? ' • $type' : ''} (aktiv)'
+                      : '$name${type.isNotEmpty ? ' • $type' : ''}';
+                  return CupertinoActionSheetAction(
+                    onPressed: () => Navigator.of(ctx).pop(d),
+                    child: Text(label),
+                  );
+                }).toList(),
+                cancelButton: CupertinoActionSheetAction(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Abbrechen'),
+                ),
+              );
+            },
+          );
+
+      if (selectedDevice != null) {
+        final id = selectedDevice['id'] as String?;
+        final name = (selectedDevice['name'] as String?) ?? 'Gerät';
+        if (id != null) {
+          final ok = await WebApiService().transferPlaybackTo(id, play: true);
+          await WebApiService().ensureConnected(force: true);
+          if (ok) {
+            Logicservice().setPreferredDeviceId(id);
+            Logicservice().setCurrentDeviceName(name);
+          }
+
+          await showCupertinoDialog(
+            context: context,
+            builder: (ctx) => CupertinoAlertDialog(
+              title: const Text('Gerät ausgewählt'),
+              content: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  ok
+                      ? 'Wiedergabe auf "$name" gestartet.'
+                      : 'Gerät konnte nicht aktiviert werden.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              actions: [
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  child: const Text('OK'),
+                  onPressed: () => Navigator.of(ctx).pop(),
+                ),
+              ],
             ),
-          ),
-          actions: [
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              child: const Text('OK'),
-              onPressed: () => Navigator.of(ctx).pop(),
-            ),
-          ],
-        ),
-      );
+          );
+        }
+      }
     } catch (e) {
       _showSpotifyRequiredDialog(context);
     }
@@ -303,6 +379,8 @@ class SetupPage extends StatelessWidget {
         final String spotifyStatus = !isAuthorized
             ? 'Nicht verbunden'
             : (isConnected ? 'Verbunden' : 'Verbunden');
+
+        final String deviceName = logic.currentDeviceName ?? '';
 
         return Scaffold(
           extendBodyBehindAppBar: true,
@@ -365,6 +443,13 @@ class SetupPage extends StatelessWidget {
                           FontAwesomeIcons.spotify,
                           "Spotify",
                           spotifyStatus,
+                          onTap: () => _connectOrCheckSpotify(context),
+                        ),
+                        const Divider(height: 1, thickness: 0.5),
+                        _settingsRow(
+                          "📱",
+                          "Device",
+                          deviceName,
                           onTap: () => _connectOrCheckSpotify(context),
                         ),
                         const Divider(height: 1, thickness: 0.5),
@@ -435,11 +520,16 @@ class SetupPage extends StatelessWidget {
                         return;
                       }
 
-                      // Require Spotify auth and an active device
+                      // Require Spotify auth and a selected device
                       if (logic.token.isEmpty) {
                         _showSpotifyRequiredDialog(context);
                         return;
                       }
+                      if (logic.preferredDeviceId == null) {
+                        _showDeviceSelectionRequiredDialog(context);
+                        return;
+                      }
+
                       final hasActive = await WebApiService()
                           .ensureActiveDevice(force: true);
                       if (!hasActive) {

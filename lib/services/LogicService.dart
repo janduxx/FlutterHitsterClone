@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hitsterclone/services/WebApiService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hitsterclone/services/WebApiService.dart';
 
 class Logicservice extends ChangeNotifier {
-  // Singleton setup
   static final Logicservice _instance = Logicservice._internal();
   factory Logicservice() => _instance;
   late final Future<void> initFuture;
@@ -11,20 +10,71 @@ class Logicservice extends ChangeNotifier {
     initFuture = _initialize();
   }
 
-  // Persistence keys
   static const String _playersKey = 'players';
   static const String _hasSeenStartupKey = 'has_seen_startup';
 
-  // Variables
   List<Track> _tracks = [];
   List<Track> _trackYetToPlay = [];
   String _playlistId = '';
   Playlist? _playlist;
-  int _rounds = 10; // default rounds
+  int _rounds = 10;
+
   bool _connected = false;
   String _token = '';
+
+  // NEW
+  String? _activeDeviceId;
+  String? _availableDeviceId;
+  String? _preferredDeviceId;
+  bool _hasDevice = false;
+  String? _currentDeviceName; // display in SetupPage
+
   bool get connected => _connected;
   String get token => _token;
+
+  List<Track> get tracks => _tracks;
+  List<Track> get trackYetToPlay => _trackYetToPlay;
+  String get playlistId => _playlistId;
+  Playlist? get playlist => _playlist;
+  int get rounds => _rounds;
+  bool get hasDevice => _hasDevice;
+
+  String? get activeDeviceId => _activeDeviceId;
+  String? get availableDeviceId => _availableDeviceId;
+  String? get preferredDeviceId => _preferredDeviceId;
+  String? get currentDeviceName => _currentDeviceName;
+
+  List<String> _players = [];
+  List<String> get players => _players;
+
+  bool _hasSeenStartup = false;
+  bool get hasSeenStartup => _hasSeenStartup;
+
+  void setPreferredDeviceId(String? id) {
+    _preferredDeviceId = id;
+    notifyListeners();
+  }
+
+  void setActiveDeviceId(String? id) {
+    _activeDeviceId = id;
+    notifyListeners();
+  }
+
+  void setAvailableDeviceId(String? id) {
+    _availableDeviceId = id;
+    notifyListeners();
+  }
+
+  void setHasDevice(bool value) {
+    _hasDevice = value;
+    notifyListeners();
+  }
+
+  void setCurrentDeviceName(String? name) {
+    _currentDeviceName = name;
+    notifyListeners();
+  }
+
   void setToken(String newToken) {
     _token = newToken;
     notifyListeners();
@@ -35,35 +85,9 @@ class Logicservice extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<Track> get tracks => _tracks;
-  List<Track> get trackYetToPlay => _trackYetToPlay;
-  String get playlistId => _playlistId;
-  Playlist? get playlist => _playlist;
-  int get rounds => _rounds;
-  List<String> _players = [];
-  bool _hasSeenStartup = false;
-  bool get hasSeenStartup => _hasSeenStartup;
-  void setPlayers(List<String> newPlayers) {
-    _players = newPlayers;
+  void setPlaylist(Playlist? playlist) {
+    _playlist = playlist;
     notifyListeners();
-    _savePlayers();
-  }
-
-  void removeTrackYetToplay(Track track) {
-    _trackYetToPlay.remove(track);
-    notifyListeners();
-  }
-
-  List<String> get players => _players;
-
-  void setTracks(List<Track> newTracks) {
-    _tracks = newTracks;
-    _trackYetToPlay = newTracks;
-    notifyListeners();
-  }
-
-  void resetTracksToPlay() {
-    _trackYetToPlay = _tracks;
   }
 
   void setPlaylistId(String id) {
@@ -71,8 +95,19 @@ class Logicservice extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setPlaylist(Playlist? playlist) {
-    _playlist = playlist;
+  void setTracks(List<Track> newTracks) {
+    _tracks = newTracks;
+    _trackYetToPlay = newTracks.toList();
+    notifyListeners();
+  }
+
+  void resetTracksToPlay() {
+    _trackYetToPlay = _tracks.toList();
+    notifyListeners();
+  }
+
+  void removeTrackYetToplay(Track track) {
+    _trackYetToPlay.remove(track);
     notifyListeners();
   }
 
@@ -81,13 +116,17 @@ class Logicservice extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setPlayers(List<String> newPlayers) {
+    _players = newPlayers;
+    notifyListeners();
+    _savePlayers();
+  }
+
   Future<void> _savePlayers() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setStringList(_playersKey, _players);
-    } catch (_) {
-      // ignore persistence errors
-    }
+    } catch (_) {}
   }
 
   Future<void> _loadPlayers() async {
@@ -98,25 +137,18 @@ class Logicservice extends ChangeNotifier {
         _players = saved;
         notifyListeners();
       }
-    } catch (_) {
-      // ignore persistence errors
-    }
+    } catch (_) {}
   }
 
   Future<void> _loadStartupFlag() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       _hasSeenStartup = prefs.getBool(_hasSeenStartupKey) ?? false;
-    } catch (_) {
-      // ignore persistence errors
-    }
+    } catch (_) {}
   }
 
   Future<void> _initialize() async {
-    await Future.wait([
-      _loadPlayers(),
-      _loadStartupFlag(),
-    ]);
+    await Future.wait([_loadPlayers(), _loadStartupFlag()]);
   }
 
   Future<void> markStartupSeen() async {
@@ -125,8 +157,6 @@ class Logicservice extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_hasSeenStartupKey, true);
-    } catch (_) {
-      // ignore persistence errors
-    }
+    } catch (_) {}
   }
 }

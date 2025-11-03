@@ -11,7 +11,6 @@ import 'package:hitsterclone/services/LogicService.dart';
 import 'package:hitsterclone/services/SpotifyService.dart';
 import 'package:hitsterclone/services/WebApiService.dart';
 import 'package:provider/provider.dart';
-import 'package:spotify_sdk/spotify_sdk.dart';
 part 'game/game_page_logic.dart';
 
 class GamePage extends StatefulWidget {

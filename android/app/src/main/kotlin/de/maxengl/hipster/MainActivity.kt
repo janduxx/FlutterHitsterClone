@@ -1,4 +1,4 @@
-package de.maxengl.hipster-engl.hipster
+package de.maxengl.hipster
 
 import io.flutter.embedding.android.FlutterActivity
 

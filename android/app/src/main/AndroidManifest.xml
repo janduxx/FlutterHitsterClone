@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:label="Hipster"
         android:name="${applicationName}"
@@ -30,7 +32,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="hipsterclone" android:host="auth" />
+                <data android:scheme="hipsterclone" android:host="callback" />
             </intent-filter>
         </activity>
 

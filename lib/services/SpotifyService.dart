@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:hitsterclone/services/LogicService.dart';
 import 'package:hitsterclone/services/WebApiService.dart';
-import 'package:spotify_sdk/spotify_sdk.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class SpotifyService {

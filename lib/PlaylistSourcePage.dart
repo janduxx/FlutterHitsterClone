@@ -1,9 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:hitsterclone/AddPlayersPage.dart';
 import 'package:hitsterclone/ArtistSelectionPage.dart';
 import 'package:hitsterclone/PlaylistScreen.dart';
-import 'package:hitsterclone/PlaylistSourcePage.dart';
+import 'package:hitsterclone/SelectedSongsPage.dart';
 import 'package:hitsterclone/SearchPlaylistPage.dart';
 import 'package:provider/provider.dart';
 import 'package:hitsterclone/services/LogicService.dart';
@@ -38,79 +37,89 @@ class PlaylistSourcePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (Logicservice().playlist != null)
-                    Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SelectedSongsPage(),
                           ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 16,
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
-                            child: Row(
-                              children: [
-                                if (Logicservice().playlist?.imageUrl != null)
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      Logicservice().playlist?.imageUrl ??
-                                          'NONE',
-                                      width: 48,
-                                      height: 48,
-                                      fit: BoxFit.cover,
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 16,
+                              ),
+                              child: Row(
+                                children: [
+                                  if (Logicservice().playlist?.imageUrl != null)
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        Logicservice().playlist?.imageUrl ??
+                                            'NONE',
+                                        width: 48,
+                                        height: 48,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      Logicservice().playlist?.name != null &&
+                                              Logicservice()
+                                                      .playlist!
+                                                      .name!
+                                                      .length >
+                                                  13
+                                          ? '${Logicservice().playlist!.name!.substring(0, 13)}...'
+                                          : Logicservice().playlist?.name ??
+                                                'NO NAME',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black,
+                                      ),
                                     ),
                                   ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    Logicservice().playlist?.name != null &&
-                                            Logicservice()
-                                                    .playlist!
-                                                    .name!
-                                                    .length >
-                                                13
-                                        ? '${Logicservice().playlist!.name!.substring(0, 13)}...'
-                                        : Logicservice().playlist?.name ??
-                                              'NO NAME',
+                                  Text(
+                                    Logicservice().tracks?.length.toString() ??
+                                        "-1",
                                     style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black,
+                                      fontSize: 15,
+                                      color: Colors.black54,
                                     ),
                                   ),
-                                ),
-                                Text(
-                                  Logicservice().tracks?.length.toString() ??
-                                      "-1",
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.black54,
+                                  const SizedBox(width: 6),
+                                  const Icon(
+                                    Icons.chevron_right,
+                                    color: Colors.black38,
+                                    size: 22,
                                   ),
-                                ),
-                                const SizedBox(width: 6),
-                                const Icon(
-                                  Icons.chevron_right,
-                                  color: Colors.black38,
-                                  size: 22,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   Text(

@@ -525,30 +525,35 @@ class WebApiService {
         final tracksData = _safeJson(tracksRes.body);
         final albumTracks = tracksData['items'] as List? ?? [];
 
+        final albumImages = ((a as Map<String, dynamic>)['images'] as List? ?? [])
+            .whereType<Map<String, dynamic>>()
+            .toList();
+        final albumImageUrl =
+            albumImages.isNotEmpty ? (albumImages.first['url'] as String?) : null;
+        final albumName = (a as Map<String, dynamic>)['name'] as String?;
+
         for (final t in albumTracks) {
           final track = (t as Map<String, dynamic>);
           final uri = track['uri'];
           if (uri is String && !seenUris.contains(uri)) {
             seenUris.add(uri);
-            try {
-              tracks.add(Track.fromJson(track));
-            } catch (_) {
-              tracks.add(
-                Track(
-                  id: track['id'] as String? ?? '',
-                  name: track['name'] as String? ?? 'UNKNOWN',
-                  artists: ((track['artists'] as List? ?? []).map(
-                    (a) => (a is Map<String, dynamic>)
-                        ? (a['name'] as String? ?? 'Unknown')
-                        : 'Unknown',
-                  )).toList(),
-                  albumName: null,
-                  albumImageUrl: null,
-                  uri: uri,
-                  durationMs: (track['duration_ms'] as int? ?? 0),
-                ),
-              );
-            }
+            final artistsList = ((track['artists'] as List? ?? []).map(
+              (aa) => (aa is Map<String, dynamic>)
+                  ? (aa['name'] as String? ?? 'Unknown')
+                  : 'Unknown',
+            )).toList();
+
+            tracks.add(
+              Track(
+                id: track['id'] as String? ?? '',
+                name: track['name'] as String? ?? 'UNKNOWN',
+                artists: artistsList,
+                albumName: albumName,
+                albumImageUrl: albumImageUrl,
+                uri: uri,
+                durationMs: (track['duration_ms'] as int? ?? 0),
+              ),
+            );
           }
         }
 

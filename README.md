@@ -99,12 +99,15 @@ A fast-paced music trivia game powered by Spotify. Challenge friends to guess so
    SPOTIFY_SCOPES=user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative user-top-read
    ```
 
-5. **Install dependencies**
+5. **Bundle .env**
+   - Add `.env` to `flutter/assets` in `pubspec.yaml` (see snippet above)
+
+6. **Install dependencies**
    ```bash
    flutter pub get
    ```
 
-6. **Run the app**
+7. **Run the app**
    ```bash
    # iOS
    flutter run -d ios
@@ -242,6 +245,7 @@ This project follows standard Dart/Flutter conventions:
    - Ensure `.env` contains `SPOTIFY_CLIENT_ID`
    - Confirm redirect URI in Spotify dashboard is `hipsterclone://callback`
    - Ensure iOS `Info.plist` includes URL scheme `hipsterclone`
+   - If you see a white screen, verify `.env` is bundled in `pubspec.yaml` assets and perform a full restart (not hot reload)
 
 2. **No Audio Playback**
    - Ensure a Spotify device is active/logged in (phone, desktop, or speaker)
@@ -287,3 +291,34 @@ If you encounter any issues or have questions:
 ---
 
 **Note**: Requires Spotify Premium. Playback is controlled via Spotify Connect on your active device.
+## ⚡ Quick Start
+
+- Requirements: Flutter, Spotify Premium, a logged-in Spotify device (phone/desktop/speaker)
+- Create a Spotify app → add redirect URI `hipsterclone://callback`
+- Create `.env` in `hitsterclone/` (see template below)
+- Bundle `.env` as an asset in `pubspec.yaml`
+- Install deps and run:
+
+```bash
+flutter pub get
+flutter run -d ios   # or -d android
+```
+
+Env template:
+
+```env
+SPOTIFY_CLIENT_ID=your_client_id
+SPOTIFY_REDIRECT_URI=hipsterclone://callback
+SPOTIFY_SCOPES=user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative user-top-read
+```
+
+Add `.env` to `pubspec.yaml` assets:
+
+```yaml
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
+    - assets/data.json
+    - assets/gifs/
+```
